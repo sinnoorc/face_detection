@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +8,7 @@ import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 
 class HomeController extends GetxController {
   late CameraController cameraController;
-  late Future<void> initializeControllerFuture;
+
   late final FaceDetector faceDetector;
   RxBool isFaceDetected = false.obs;
   RxBool isFaceInsideBox = false.obs;
@@ -14,25 +16,35 @@ class HomeController extends GetxController {
   Rx<CameraImage?> currentImage = Rx<CameraImage?>(null);
   Rx<Rect?> adjustedBoundingBox = Rx<Rect?>(null);
 
+  int frameSkipCount = 0; // Counter to skip frames
+
   @override
-  void onInit() {
-    super.onInit();
-    initializeCamera();
+  void onInit() async {
+    await initializeCamera();
     faceDetector = FaceDetector(options: FaceDetectorOptions(enableClassification: true));
+    super.onInit();
   }
 
   Future<void> initializeCamera() async {
     final cameras = await availableCameras();
-    final frontCamera = cameras.firstWhere((camera) => camera.lensDirection == CameraLensDirection.front);
-    cameraController = CameraController(frontCamera, ResolutionPreset.high);
-    initializeControllerFuture = cameraController.initialize().then((_) {
-      // Start the camera stream
-      cameraController.startImageStream((CameraImage image) {
-        currentImage.value = image;
+    final frontCamera = cameras.firstWhere(
+      (camera) => camera.lensDirection == CameraLensDirection.front,
+      orElse: () => cameras.first,
+    );
+    cameraController = CameraController(frontCamera, ResolutionPreset.high); // Reduced resolution
+    await cameraController.initialize();
+    startImageStream();
+  }
+
+  void startImageStream() {
+    cameraController.startImageStream((CameraImage image) {
+      if (frameSkipCount >= 5) {
+        // Process every 5th frame
         detectFaces(image);
-      });
-    }).catchError((error) {
-      Get.snackbar('Error', error.toString());
+        frameSkipCount = 0;
+      } else {
+        frameSkipCount++;
+      }
     });
   }
 
@@ -130,7 +142,6 @@ class HomeController extends GetxController {
   void checkLiveness(CameraImage image, Face face) {
     // Implement the call to AWS Rekognition with the face image
     // Update instructionText based on the response from AWS Rekognition
-    Get.snackbar('Liveness', 'Liveness');
   }
 
   @override

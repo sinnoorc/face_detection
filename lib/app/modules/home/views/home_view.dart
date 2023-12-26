@@ -13,20 +13,13 @@ class HomeView extends GetView<HomeController> {
       child: Scaffold(
         appBar: AppBar(title: const Text('Selfie Verification')),
         body: SafeArea(
-          child: Obx(
-            () {
-              return FutureBuilder<void>(
-                future: controller.initializeControllerFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return buildCameraStack(context);
-                  } else {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                },
-              );
-            },
-          ),
+          child: Obx(() {
+            if (controller.currentImage.value != null) {
+              return buildCameraStack(context);
+            } else {
+              return const Center(child: CircularProgressIndicator());
+            }
+          }),
         ),
       ),
     );
