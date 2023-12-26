@@ -31,9 +31,10 @@ class HomeController extends GetxController {
       (camera) => camera.lensDirection == CameraLensDirection.front,
       orElse: () => cameras.first,
     );
-    cameraController = CameraController(frontCamera, ResolutionPreset.high); // Reduced resolution
+    cameraController = CameraController(frontCamera, ResolutionPreset.medium); // Reduced resolution
     await cameraController.initialize();
     startImageStream();
+    update();
   }
 
   void startImageStream() {

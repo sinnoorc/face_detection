@@ -13,13 +13,15 @@ class HomeView extends GetView<HomeController> {
       child: Scaffold(
         appBar: AppBar(title: const Text('Selfie Verification')),
         body: SafeArea(
-          child: Obx(() {
-            if (controller.currentImage.value != null) {
-              return buildCameraStack(context);
-            } else {
-              return const Center(child: CircularProgressIndicator());
-            }
-          }),
+          child: GetBuilder<HomeController>(
+            builder: (_) {
+              if (controller.cameraController.value.isInitialized) {
+                return Obx(() => buildCameraStack(context));
+              } else {
+                return const Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
         ),
       ),
     );
@@ -44,7 +46,10 @@ class HomeView extends GetView<HomeController> {
           bottom: 50.0,
           child: Text(
             controller.instructionText.value,
-            style: const TextStyle(color: Colors.white, fontSize: 18.0),
+            style: const TextStyle(
+              color: Colors.red,
+              fontSize: 18.0,
+            ),
           ),
         ),
       ],
