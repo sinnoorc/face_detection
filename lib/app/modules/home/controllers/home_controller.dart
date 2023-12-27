@@ -7,6 +7,18 @@ import 'package:get/get.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 
 class HomeController extends GetxController {
+  List<Color> splashColors = [
+    Colors.red,
+    Colors.green,
+    Colors.blue,
+    Colors.yellow,
+    Colors.purple,
+    Colors.orange,
+  ];
+
+  Rx<Color> overlayColor = Colors.transparent.obs;
+  int currentColorIndex = 0;
+
   late CameraController cameraController;
 
   late final FaceDetector faceDetector;
@@ -31,7 +43,7 @@ class HomeController extends GetxController {
       (camera) => camera.lensDirection == CameraLensDirection.front,
       orElse: () => cameras.first,
     );
-    cameraController = CameraController(frontCamera, ResolutionPreset.medium); // Reduced resolution
+    cameraController = CameraController(frontCamera, ResolutionPreset.medium);
     await cameraController.initialize();
     startImageStream();
     update();
@@ -141,8 +153,16 @@ class HomeController extends GetxController {
 
   // Perform liveness detection with AWS Rekognition
   void checkLiveness(CameraImage image, Face face) {
-    // Implement the call to AWS Rekognition with the face image
-    // Update instructionText based on the response from AWS Rekognition
+    Get.log('Checking liveness');
+    toggleOverlayColor();
+  }
+
+  void toggleOverlayColor() async {
+    overlayColor.value = splashColors[currentColorIndex];
+    currentColorIndex = (currentColorIndex + 1) % splashColors.length;
+    Future.delayed(const Duration(seconds: 2), () {
+      overlayColor.value = Colors.transparent;
+    });
   }
 
   @override

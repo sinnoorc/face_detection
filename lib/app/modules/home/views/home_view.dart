@@ -33,6 +33,11 @@ class HomeView extends GetView<HomeController> {
       alignment: Alignment.center,
       children: <Widget>[
         CameraPreview(controller.cameraController),
+        Obx(() => Container(
+              color: controller.overlayColor.value.withOpacity(0.5),
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+            )),
         Align(
           alignment: Alignment.center,
           child: CustomPaint(
@@ -78,9 +83,10 @@ class FaceBoundsPainter extends CustomPainter {
       ..strokeWidth = 3.0;
 
     // Calculate the overlay rectangle size to match the camera's aspect ratio.
-    final previewSize = cameraController.value.previewSize!;
+
     final overlayWidth = size.width * 0.85; // For example, 85% of screen width.
-    final overlayHeight = overlayWidth * (previewSize.height / previewSize.width);
+    // final overlayHeight = overlayWidth * (previewSize.height / previewSize.width);
+    final overlayHeight = size.height * 0.50; // For example, 85% of screen height.
 
     // Calculate the overlay rectangle position.
     final overlayX = (size.width - overlayWidth) / 2;
