@@ -14,7 +14,8 @@ class HomeView extends GetView<HomeController> {
         appBar: AppBar(title: const Text('Selfie Verification')),
         body: SafeArea(
           child: GetBuilder<HomeController>(
-            builder: (_) {
+            init: HomeController(),
+            builder: (controller) {
               if (controller.cameraController.value.isInitialized) {
                 return Obx(() => buildCameraStack(context));
               } else {
