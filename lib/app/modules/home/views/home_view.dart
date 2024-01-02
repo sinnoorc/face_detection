@@ -1,59 +1,61 @@
 import 'package:camera/camera.dart';
+import 'package:face_detection/app/modules/home/controllers/face_detection_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../controllers/home_controller.dart';
-
-class HomeView extends GetView<HomeController> {
+class HomeView extends GetView<FaceDetectionController> {
   const HomeView({Key? key}) : super(key: key);
+
+  @override
+  FaceDetectionController get controller => Get.put(FaceDetectionController());
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(title: const Text('Selfie Verification')),
-        body: SafeArea(
-          child: GetBuilder<HomeController>(
-            init: HomeController(),
-            builder: (controller) {
-              if (controller.cameraController.value.isInitialized) {
-                return Obx(() => buildCameraStack(context));
-              } else {
-                return const Center(child: CircularProgressIndicator());
-              }
-            },
-          ),
+        body: GetBuilder<FaceDetectionController>(
+          init: controller,
+          builder: (controller) {
+            return controller.isCameraInitialized
+                ? Obx(() => buildCameraStack(context, controller))
+                : const Center(child: CircularProgressIndicator());
+          },
         ),
       ),
     );
   }
 
-  Widget buildCameraStack(BuildContext context) {
+  Widget buildCameraStack(BuildContext context, FaceDetectionController controller) {
     return Stack(
       alignment: Alignment.center,
       children: <Widget>[
-        CameraPreview(controller.cameraController),
-        Obx(() => Container(
-              color: controller.overlayColor.value.withOpacity(0.5),
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-            )),
+        CameraPreview(controller.cameraController!),
+        AnimatedBuilder(
+          animation: controller.colorAnimation,
+          builder: (_, __) => Container(
+            // color: controller.overlayColor.value.withOpacity(0.7),
+            color: controller.colorAnimation.value == Colors.transparent
+                ? null
+                : controller.colorAnimation.value!.withOpacity(0.7),
+          ),
+        ),
         Align(
           alignment: Alignment.center,
           child: CustomPaint(
             size: Size(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height),
             painter: FaceBoundsPainter(
-              controller.isFaceInsideBox.value,
-              controller.cameraController,
+              controller.isFaceInsideBox,
+              controller.cameraController!,
             ),
           ),
         ),
         Positioned(
           bottom: 50.0,
           child: Text(
-            controller.instructionText.value,
+            controller.instructionText,
             style: const TextStyle(
-              color: Colors.red,
+              color: Colors.white,
               fontSize: 18.0,
             ),
           ),
@@ -83,10 +85,8 @@ class FaceBoundsPainter extends CustomPainter {
       ..strokeWidth = 3.0;
 
     // Calculate the overlay rectangle size to match the camera's aspect ratio.
-
     final overlayWidth = size.width * 0.85; // For example, 85% of screen width.
-    // final overlayHeight = overlayWidth * (previewSize.height / previewSize.width);
-    final overlayHeight = size.height * 0.50; // For example, 85% of screen height.
+    final overlayHeight = size.height * 0.50; // For example, 50% of screen height.
 
     // Calculate the overlay rectangle position.
     final overlayX = (size.width - overlayWidth) / 2;
