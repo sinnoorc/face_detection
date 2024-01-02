@@ -86,6 +86,11 @@ class FaceDetectionController extends GetxController with GetTickerProviderState
 
   _setupAnimation() {
     // Assuming you want to animate between the first and second color initially
+    animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+
     colorAnimation = ColorTween(
       begin: _splashColors[0],
       end: _splashColors[1],
@@ -106,9 +111,9 @@ class FaceDetectionController extends GetxController with GetTickerProviderState
   }
 
   void _startNextColorAnimation() {
-    // This will cycle through your colors
     currentColorIndex = (currentColorIndex + 1) % _splashColors.length;
     final nextColorIndex = (currentColorIndex + 1) % _splashColors.length;
+
     colorAnimation = ColorTween(
       begin: _splashColors[currentColorIndex],
       end: _splashColors[nextColorIndex],
@@ -118,10 +123,10 @@ class FaceDetectionController extends GetxController with GetTickerProviderState
   }
 
   Future<void> initialize() async {
+    _setupAnimation();
     await _initializeCamera();
     await _initializeFaceDetector();
 
-    _setupAnimation();
     _setupNoFaceDetectedTimer();
   }
 
