@@ -102,6 +102,7 @@ class FaceDetectionController extends GetxController with GetTickerProviderState
           _startNextColorAnimation();
         }
       });
+    update();
   }
 
   void _startNextColorAnimation() {
@@ -117,10 +118,9 @@ class FaceDetectionController extends GetxController with GetTickerProviderState
   }
 
   Future<void> initialize() async {
-    await Future.wait([
-      _initializeCamera(),
-      _initializeFaceDetector(),
-    ]);
+    await _initializeCamera();
+    await _initializeFaceDetector();
+
     _setupAnimation();
     _setupNoFaceDetectedTimer();
   }
