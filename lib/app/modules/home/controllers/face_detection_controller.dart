@@ -302,6 +302,11 @@ class FaceDetectionController extends GetxController with GetTickerProviderState
 
     // Reset the animation
     animationController.reset();
+    currentColorIndex = 0;
+    colorAnimation = ColorTween(
+      begin: _splashColors[0],
+      end: _splashColors[1],
+    ).animate(animationController);
 
     // Cancel and clear timers
     countdownTimer?.cancel();
