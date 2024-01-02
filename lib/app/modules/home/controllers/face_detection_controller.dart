@@ -84,40 +84,39 @@ class FaceDetectionController extends GetxController with GetTickerProviderState
     });
   }
 
-  _setupAnimation() {
-    // Assuming you want to animate between the first and second color initially
+  void _setupAnimation() {
     animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     );
 
+    // Start with transparent color.
     colorAnimation = ColorTween(
-      begin: _splashColors[0],
-      end: _splashColors[1],
+      begin: Colors.transparent,
+      end: Colors.transparent,
     ).animate(animationController)
       ..addListener(() {
-        // This will be called each time the animation value changes
         overlayColor.value = colorAnimation.value!;
         update(); // This will trigger the GetBuilder to rebuild the UI
       })
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
-          // Reset to initial value and change to the next color
-          animationController.reset();
           _startNextColorAnimation();
         }
       });
-    update();
   }
 
   void _startNextColorAnimation() {
-    currentColorIndex = (currentColorIndex + 1) % _splashColors.length;
-    final nextColorIndex = (currentColorIndex + 1) % _splashColors.length;
+    // Ensure we cycle through the colors correctly
+    int nextIndex = (currentColorIndex + 1) % _splashColors.length;
 
     colorAnimation = ColorTween(
       begin: _splashColors[currentColorIndex],
-      end: _splashColors[nextColorIndex],
+      end: _splashColors[nextIndex],
     ).animate(animationController);
+
+    // Set the next color index for the next cycle.
+    currentColorIndex = nextIndex;
 
     animationController.forward();
   }
